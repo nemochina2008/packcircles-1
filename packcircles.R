@@ -15,8 +15,8 @@ set.seed(1)
 
 # Parameters ----
 n <- 750 # number of circles
-m <- 9 # number of facets
-animate <- TRUE # animate?
+m <- 300 # number of facets
+animate <- FALSE # animate?
 
 # Function for making pack of circles ----
 make_pack <- function(n, dir = 1, rep = 1) {
@@ -40,21 +40,37 @@ if(animate) {
     map_df(~make_pack(runif(1, 0.75 * n, n), runif(1, -1, 1), runif(1, n, n)), .id = "facet")
 }
 
+make_pack2 <- function(X, Y, n) {
+  df <- data.frame(x = rep(X, times = n), y = rep(Y, times = n), r = c(250, rep(10, times = n-1))) %>%
+    mutate(x = jitter(x), y = jitter(y))
+  temp <- circleRepelLayout(df, c(X - 5, X + 5), c(Y - 5, Y + 5))
+  temp$layout
+}
+
+df <- 1:m %>%
+  map_df(~make_pack2(runif(1, -50, 50), runif(1, -50, 50), 6), .id = "facet")
+
+test <- (circleRepelLayout(df %>% select(x, y, radius)))$layout %>%
+  mutate(dist = sqrt(x^2 + y^2)) %>%
+  filter(dist <= 50)
+
+#df <- df$layout
 
 # Make plot ----
 p <- ggplot() +
-  geom_circle(aes(x0 = x, y0 = y, r = radius, alpha = radius, fill = radius, frame = .frame),
-              tf, size = 0.5,
+  geom_circle(aes(x0 = x, y0 = y, r = radius, fill = fill),
+              test %>% mutate(fill = runif(nrow(.), 0, 1)), size = 0.55,
               n = 90) +
   coord_equal() +
-  scale_fill_gradient(low = "#efedf5", high = "#3f007d") +
+  scale_fill_viridis(option = "B") +
   #facet_wrap(~facet) +
   theme_blankcanvas()
+#p
 
 # Save plot ----
 if(animate) {
   animation::ani.options(interval = 1/30)
   gganimate(p, "gifs/gif0001.gif", title_frame = FALSE, ani.width = 600, ani.height = 600)
 } else {
-  ggsave("plots/plot001.png", p, width = 40, height = 40, units = c("in"))
+  ggsave("plots/plot002.png", p, width = 40, height = 40, units = c("in"))
 }
