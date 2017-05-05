@@ -41,7 +41,7 @@ if(animate) {
 }
 
 make_pack2 <- function(X, Y, n) {
-  df <- data.frame(x = rep(X, times = n), y = rep(Y, times = n), r = c(250, rep(10, times = n-1))) %>%
+  df <- data.frame(x = rep(X, times = n), y = rep(Y, times = n), r = c(1000, rep(10, times = n-1))) %>%
     mutate(x = jitter(x), y = jitter(y))
   temp <- circleRepelLayout(df, c(X - 5, X + 5), c(Y - 5, Y + 5))
   temp$layout
@@ -51,18 +51,18 @@ df <- 1:m %>%
   map_df(~make_pack2(runif(1, -50, 50), runif(1, -50, 50), 6), .id = "facet")
 
 test <- (circleRepelLayout(df %>% select(x, y, radius)))$layout %>%
-  mutate(dist = sqrt(x^2 + y^2)) %>%
-  filter(dist <= 50)
+  mutate(dist = sqrt(x^2 + y^2)) #%>%
+  #filter(dist <= 50)
 
 #df <- df$layout
 
 # Make plot ----
 p <- ggplot() +
-  geom_circle(aes(x0 = x, y0 = y, r = radius, fill = fill),
+  geom_circle(aes(x0 = x, y0 = y, r = radius, alpha = dist),
               test %>% mutate(fill = runif(nrow(.), 0, 1)), size = 0.55,
-              n = 90) +
+              n = 4, fill = "black") +
   coord_equal() +
-  scale_fill_viridis(option = "B") +
+  #scale_fill_viridis(option = "B") +
   #facet_wrap(~facet) +
   theme_blankcanvas()
 #p
@@ -72,5 +72,5 @@ if(animate) {
   animation::ani.options(interval = 1/30)
   gganimate(p, "gifs/gif0001.gif", title_frame = FALSE, ani.width = 600, ani.height = 600)
 } else {
-  ggsave("plots/plot002.png", p, width = 40, height = 40, units = c("in"))
+  ggsave("plots/plot003.png", p, width = 18, height = 18, units = c("in"))
 }
